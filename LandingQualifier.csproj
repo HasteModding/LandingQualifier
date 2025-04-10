@@ -1,0 +1,56 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>netstandard2.1</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <LangVersion>latest</LangVersion>
+
+        <SteamInstallPathFromRegistry Condition="'$(OS)' == 'Windows_NT'">$(registry:HKEY_LOCAL_MACHINE\SOFTWARE\WOW6432Node\Valve\Steam@InstallPath)</SteamInstallPathFromRegistry>
+        <SteamDir Condition="'$(OS)' == 'Windows_NT' AND '$(SteamInstallPathFromRegistry)' != ''">$(SteamInstallPathFromRegistry)/steamapps</SteamDir>
+        <SteamDir Condition="'$(OS)' == 'Windows_NT' AND '$(SteamInstallPathFromRegistry)' == ''">C:/Program Files (x86)/Steam/steamapps</SteamDir>
+        <SteamDir Condition="'$(OS)' != 'Windows_NT'">$(HOME)/.steam/steam/steamapps</SteamDir>
+
+        <HasteAppId>1796470</HasteAppId>
+
+        <!--
+         IMPORTANT: vfd only updates after game is installed, or steam is restarted, so if you move Haste isntall to
+         a different library, you'll need to restart steam client fully for it to regenerate required file
+         -->
+        <Libraries>$([System.IO.File]::ReadAllText('$(SteamDir)/libraryfolders.vdf'))</Libraries>
+        <InstallLibrary>$(Libraries)</InstallLibrary>
+        <!-- delete everything after line specifying Haste space usage -->
+        <InstallLibrary>$([System.Text.RegularExpressions.Regex]::Replace('$(InstallLibrary)', '"$(HasteAppId)"(.|[\n\r])*', ''))</InstallLibrary>
+        <!-- delete everything before last library path (which must contain Haste as we removed everything after Haste) -->
+        <InstallLibrary>$([System.Text.RegularExpressions.Regex]::Replace('$(InstallLibrary)', '(.|[\n\r])*(?="path").{9}', ''))</InstallLibrary>
+        <!-- delete "extraneous" doublequote at the end of the path and everything after that as well, leaving just library -->
+        <InstallLibrary>$([System.Text.RegularExpressions.Regex]::Replace('$(InstallLibrary)', '"[\r\n](.|[\n\r])*', '/steamapps'))</InstallLibrary>
+
+        <HasteDir>$(InstallLibrary)/common/Haste</HasteDir>
+        <HasteDlls>$(HasteDir)/Haste_Data/Managed/*.dll</HasteDlls>
+
+        <WorkshopDir>$(InstallLibrary)/workshop/content/$(HasteAppId)</WorkshopDir>
+        <WorkshopDlls>$(WorkshopDir)/*/*.dll</WorkshopDlls>
+
+        <Test>./props.txt</Test>
+
+        <!-- We are referencing mscorlib/netstandard/etc. in the game, so disable the system framework refs -->
+        <DisableImplicitFrameworkReferences>true</DisableImplicitFrameworkReferences>
+        <!-- Do not generate .deps.json file (it is not needed) -->
+        <GenerateDependencyFile>false</GenerateDependencyFile>
+        <RootNamespace>ImWakinEre</RootNamespace>
+        <!-- Do not generate .pdb (debugging symbols) - you could ship this with your mod if you want, up to you -->
+        <!--        <DebugType>none</DebugType>-->
+    </PropertyGroup>
+
+    <ItemGroup>
+        <!-- Reference all DLLs in the game. If you do not actually use anything in a DLL,
+         that DLL will not get referenced in your compiled mod, so it's fine to just reference everything.
+         Private="False" means that the referenced DLLs will not get copied to the output directory. -->
+        <Reference Include="$(HasteDlls)" Private="false"/>
+        <Reference Include="$(WorkshopDlls)" Private="false"/>
+        <!-- Harmony -->
+        <!-- <Reference Include="C:\Program Files (x86)\Steam\steamapps\workshop\content\1796470\3385184093\*.dll" Private="false"/> -->
+    </ItemGroup>
+
+</Project>
