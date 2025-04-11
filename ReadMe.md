@@ -1,0 +1,1 @@
+This Repo uses standard Haste mod solution and has no dependencies, here's it in [steam workshop](https://steamcommunity.com/sharedfiles/filedetails/?id=3458734546)

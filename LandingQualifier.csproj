@@ -38,9 +38,9 @@
         <DisableImplicitFrameworkReferences>true</DisableImplicitFrameworkReferences>
         <!-- Do not generate .deps.json file (it is not needed) -->
         <GenerateDependencyFile>false</GenerateDependencyFile>
-        <RootNamespace>ImWakinEre</RootNamespace>
+        <RootNamespace>dev.alice_is.LandingQualifier</RootNamespace>
         <!-- Do not generate .pdb (debugging symbols) - you could ship this with your mod if you want, up to you -->
-        <!--        <DebugType>none</DebugType>-->
+        <DebugType>none</DebugType>
     </PropertyGroup>
 
     <ItemGroup>
